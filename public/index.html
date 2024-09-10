@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>경매</title>
+  <style>
+    html{
+      display: flex;
+      justify-content: center; /* 수평 가운데 정렬 */
+      align-items: center;    /* 수직 가운데 정렬 */
+    }
+    body{
+      background-color: #08294d;
+      overflow-x: auto;
+    }
+    .titlename{
+      background-color: #136dce;
+      width: 250px;
+      height: 50px;
+      margin: 0px 820px;
+      border: 5px solid darkgoldenrod;
+    }
+    h1{
+      text-align: center;
+      margin: 2px;
+    }
+    .leadername{
+      width: 150px;
+      padding: 5px 5px;
+      margin-left: 23px;
+      border: 1px solid black;
+      background-color: white;
+    }
+    #name{
+      width: 100px;
+    }
+    .container {
+      display: flex;
+      justify-content: space-between;
+      width: 1900px;
+    }
+    .team-container {
+      width: 830px;
+      height: 230px;
+      padding-top: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+    .team {
+      width: 150px;
+      height: 240px;
+      padding: 0px 5px;
+      margin: 5px 0px;
+      border: 2px solid darkgoldenrod;  /* 검은색 solid 테두리 */
+      text-align: center;
+      background-color: #136dce;
+    }
+    .team span {
+      color: gold;
+      font-size: 18px;
+      text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    }
+    .points{
+      color: white;
+      font-size: 18px;
+      text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    }
+    .team h2 {
+      margin-bottom: 15px;
+    }
+    .team-slot {
+      height: 50px;
+      border: 1px solid #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: lightgray;
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .team-slot.team-leader {
+      background-color: #ffcccb;  /* 팀장 자리를 구분하는 색상 */
+      font-weight: bold;
+    }
+    .team-slot.taken {
+      background-color: lightgreen;
+      cursor: not-allowed;
+    }
+    h2 {
+      margin-top: 20px;
+      text-align: center;
+    }
+    #nameDisplay {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      margin: 10px;
+    }
+    .top-right {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+    }
+    .btn {
+      padding: 10px 15px;
+      background-color: #136dce;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    .navigation-buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+    .grid-container {
+      display: flex;
+      gap: 30px;
+      justify-content: space-between;
+      width: 1885px;
+      margin-top: 5px;
+    }
+    .name-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 150px);
+      grid-template-rows: repeat(4, 50px);
+      gap: 10px;
+    }
+    .name-slot {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #000;
+      background-color: lightgray;
+      cursor: pointer;
+      height: 50px;
+      margin-bottom: 10px;
+    }
+    .name-slot.selected {
+      background-color: lightblue;
+    }
+    .displayname{
+      border: 5px solid black;
+      margin-top: 80px;
+      width: 200px;
+      height: 50px;
+      background-color: white;
+    }
+    .navigation-buttons{
+      text-align: center;
+    }
+    .point{
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    #nameGrid{
+      background-color: #136dce;
+      padding: 10px;
+      border: 2px solid darkgoldenrod;
+    }
+    #failedNameGrid{
+      background-color: #136dce;
+      padding: 10px;
+      border: 2px solid darkgoldenrod;
+    }
+    .totalpoint{
+      background-color: #136dce;
+      width: 400px;
+      margin: 0px 750px;
+      padding-top: 10px;
+      text-align: center;
+      border: 2px solid black;
+    }
+    h2{
+      color: white;
+      text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    }
+    #bid{
+      height: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="titlename">
+    <h1>싸낳대 경매</h1>
+  </div>
+
+  <div class="top-right hidden" id="adminActions">
+    <button id="startAuctionButton">경매 시작하기</button>
+    <button id="backButton">Back</button>
+    <button id="nextButton">Next</button>
+    <a href="names.html" class="btn">이름 입력하기</a>
+  </div>
+  
+  <div class="leadername">
+    <label>이름:</label>
+    <input type="text" id="name" placeholder="이름 입력">
+  </div>
+
+  <div class="container">
+    <div class="team-container">
+      <!-- 1팀 -->
+      <div class="team" id="team-1">
+        <span>1팀</span>
+        <div class="team-slot team-leader" id="slot-1" data-slot="0">팀장 자리</div>
+        <div class="name-slot" id="failed-name-slot-17"></div>
+        <div class="name-slot" id="failed-name-slot-18"></div>
+        <div class="points" id="points-team-1">포인트: 1500</div>
+      </div>
+  
+      <!-- 2팀 -->
+      <div class="team" id="team-2">
+        <span>2팀</span>
+        <div class="team-slot team-leader" id="slot-2" data-slot="1">팀장 자리</div>
+        <div class="name-slot" id="failed-name-slot-19"></div>
+        <div class="name-slot" id="failed-name-slot-20"></div>
+        <div class="points" id="points-team-2">포인트: 1500</div>
+      </div>
+  
+      <!-- 3팀 -->
+      <div class="team" id="team-3">
+        <span>3팀</span>
+        <div class="team-slot team-leader" id="slot-3" data-slot="2">팀장 자리</div>
+        <div class="name-slot" id="failed-name-slot-21"></div>
+        <div class="name-slot" id="failed-name-slot-22"></div>
+        <div class="points" id="points-team-3">포인트: 1500</div>
+      </div>
+  
+      <!-- 4팀 -->
+      <div class="team" id="team-4">
+        <span>4팀</span>
+        <div class="team-slot team-leader" id="slot-4" data-slot="3">팀장 자리</div>
+        <div class="name-slot" id="failed-name-slot-23"></div>
+        <div class="name-slot" id="failed-name-slot-24"></div>
+        <div class="points" id="points-team-4">포인트: 1500</div>
+      </div>
+    </div>
+    <div class="displayname">
+      <div id="nameDisplay">이름을 표시합니다.</div>
+    </div>
+    <div class="team-container">
+      <!-- 5팀 -->
+      <div class="team" id="team-5">
+        <span>5팀</span>
+        <div class="team-slot team-leader" id="slot-5" data-slot="4">팀장 자리</div>
+        <div class="name-slot" id="failed-name-slot-25"></div>
+        <div class="name-slot" id="failed-name-slot-26"></div>
+        <div class="points" id="points-team-5">포인트: 1500</div>
+      </div>
+  
+      <!-- 6팀 -->
+      <div class="team" id="team-6">
+        <span>6팀</span>
+        <div class="team-slot team-leader" id="slot-6" data-slot="5">팀장 자리</div>
+        <div class="name-slot" id="failed-name-slot-27"></div>
+        <div class="name-slot" id="failed-name-slot-28"></div>
+        <div class="points" id="points-team-6">포인트: 1500</div>
+      </div>
+  
+      <!-- 7팀 -->
+      <div class="team" id="team-7">
+        <span>7팀</span>
+        <div class="team-slot team-leader" id="slot-7" data-slot="6">팀장 자리</div>
+        <div class="name-slot" id="failed-name-slot-29"></div>
+        <div class="name-slot" id="failed-name-slot-30"></div>
+        <div class="points" id="points-team-7">포인트: 1500</div>
+      </div>
+  
+      <!-- 8팀 -->
+      <div class="team" id="team-8">
+        <span>8팀</span>
+        <div class="team-slot team-leader" id="slot-8" data-slot="7">팀장 자리</div>
+        <div class="name-slot" id="failed-name-slot-31"></div>
+        <div class="name-slot" id="failed-name-slot-22"></div>
+        <div class="points" id="points-team-8">포인트: 1500</div>
+      </div>
+    </div>
+  </div>
+  
+
+  <div class="grid-container">
+    <div>
+      <h2>경매 순서</h2>
+      <div class="name-grid" id="nameGrid">
+        <div class="name-slot" id="name-slot-1"></div>
+        <div class="name-slot" id="name-slot-2"></div>
+        <div class="name-slot" id="name-slot-3"></div>
+        <div class="name-slot" id="name-slot-4"></div>
+        <div class="name-slot" id="name-slot-5"></div>
+        <div class="name-slot" id="name-slot-6"></div>
+        <div class="name-slot" id="name-slot-7"></div>
+        <div class="name-slot" id="name-slot-8"></div>
+        <div class="name-slot" id="name-slot-9"></div>
+        <div class="name-slot" id="name-slot-10"></div>
+        <div class="name-slot" id="name-slot-11"></div>
+        <div class="name-slot" id="name-slot-12"></div>
+        <div class="name-slot" id="name-slot-13"></div>
+        <div class="name-slot" id="name-slot-14"></div>
+        <div class="name-slot" id="name-slot-15"></div>
+        <div class="name-slot" id="name-slot-16"></div>
+      </div>
+    </div>
+
+    <div>
+      <h2>유찰자</h2>
+      <div class="name-grid" id="failedNameGrid">
+        <div class="name-slot" id="failed-name-slot-1"></div>
+        <div class="name-slot" id="failed-name-slot-2"></div>
+        <div class="name-slot" id="failed-name-slot-3"></div>
+        <div class="name-slot" id="failed-name-slot-4"></div>
+        <div class="name-slot" id="failed-name-slot-5"></div>
+        <div class="name-slot" id="failed-name-slot-6"></div>
+        <div class="name-slot" id="failed-name-slot-7"></div>
+        <div class="name-slot" id="failed-name-slot-8"></div>
+        <div class="name-slot" id="failed-name-slot-9"></div>
+        <div class="name-slot" id="failed-name-slot-10"></div>
+        <div class="name-slot" id="failed-name-slot-11"></div>
+        <div class="name-slot" id="failed-name-slot-12"></div>
+        <div class="name-slot" id="failed-name-slot-13"></div>
+        <div class="name-slot" id="failed-name-slot-14"></div>
+        <div class="name-slot" id="failed-name-slot-15"></div>
+        <div class="name-slot" id="failed-name-slot-16"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="totalpoint">
+    <div class="point">
+      <input type="number" id="bid" placeholder="입찰 포인트 입력">
+      <button id="submitBid">입찰하기</button>
+    </div>
+
+    <h2>현재 최고 입찰자: <span id="highestBidder">없음</span></h2>
+    <h2>현재 최고 입찰 포인트: <span id="highestBid">0</span>포인트</h2>
+    <h2>남은 시간: <span id="timeLeft">15.000</span>초</h2>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let isAdmin = false; // 기본값은 일반 유저로 설정
+  
+    window.onload = function () {
+      const userType = prompt("사용자 유형을 선택하세요: admin 또는 user");
+      if (userType === 'admin') {
+        document.getElementById('adminActions').classList.remove('hidden');
+        enableNameTransfer();
+      }
+      // 페이지 로드 시 서버에서 저장된 슬롯 상태를 불러옴
+      loadGridStates();
+      
+      fetch('/get-teams')
+        .then(response => response.json())
+        .then(data => {
+          const teams = data.teams;
+          for (let i = 0; i < teams.length; i++) {
+            const slot = document.getElementById(`slot-${i + 1}`);
+            if (teams[i] !== null) {
+              slot.textContent = `${teams[i]}`;
+              slot.classList.add('taken');
+              slot.style.cursor = 'not-allowed';
+            }
+          }
+      });
+      fetch('/get-names').then(response => response.json()).then(data => {
+        data.names.forEach((name, index) => {
+          document.getElementById(`name-slot-${index + 1}`).textContent = name || '';
+        });
+      });
+    };
+    
+    const nameDisplay = document.getElementById('nameDisplay');
+    const nextButton = document.getElementById('nextButton');
+    const backButton = document.getElementById('backButton');
+    const startAuctionButton = document.getElementById('startAuctionButton');
+  
+    let currentIndex = 0;
+    let names = [];
+    let auctionTimer;
+    let auctionInProgress = false;
+    let nameLocked = false;
+    let slotSelected = false;
+    let auctionFinished = false;
+    let auctionEndTime = null;
+    let highestBid = 0;
+    let highestBidder = null;
+    let timerInterval = null;
+  
+    const nameSlots = document.querySelectorAll('#nameGrid .name-slot');
+    const failedNameSlots = document.querySelectorAll('#failedNameGrid .name-slot');
+    let selectedNameSlot = null;
+  
+    // 이름을 옮기는 로직
+    function enableNameTransfer() {
+        document.querySelectorAll('.name-slot, .failed-name-slot').forEach(slot => {
+            slot.addEventListener('click', () => {
+                if (selectedNameSlot) {
+                    const selectedName = selectedNameSlot.textContent.trim();
+                    const fromSlotId = selectedNameSlot.id;
+                    const toSlotId = slot.id;
+
+                    if (selectedName) {
+                        socket.emit('moveName', { name: selectedName, fromSlotId, toSlotId });
+                        selectedNameSlot.classList.remove('selected');
+                        selectedNameSlot = null;
+                    }
+                } else if (slot.textContent.trim()) {
+                    selectedNameSlot = slot;
+                    selectedNameSlot.classList.add('selected');
+                }
+            });
+        });
+
+      // nameGrid와 failedNameGrid 슬롯 클릭 이벤트 설정
+      document.querySelectorAll('.name-slot').forEach(slot => {
+        slot.addEventListener('click', () => handleSlotClick(slot));
+      });
+
+      document.querySelectorAll('.failed-name-slot').forEach(slot => {
+        slot.addEventListener('click', () => handleSlotClick(slot));
+      });
+    }
+
+    // 새로고침 시 서버에서 저장된 그리드 상태를 불러와 그리드 초기화
+    function loadGridStates() {
+        fetch('/get-grid-states')
+            .then(response => response.json())
+            .then(data => {
+                const { nameGridState, failedNameGridState } = data;
+
+                nameGridState.forEach((name, index) => {
+                    const nameSlot = document.getElementById(`name-slot-${index + 1}`);
+                    nameSlot.textContent = name || '';  // 이름이 없으면 공백 표시
+                });
+
+                failedNameGridState.forEach((name, index) => {
+                    const failedSlot = document.getElementById(`failed-name-slot-${index + 1}`);
+                    failedSlot.textContent = name || '';  // 이름이 없으면 공백 표시
+                });
+            });
+    }
+
+    // 서버에서 이름이 옮겨졌다는 메시지를 받으면 UI 업데이트
+    socket.on('nameMoved', ({ name, fromSlotId, toSlotId }) => {
+      const fromSlot = document.getElementById(fromSlotId);
+      const toSlot = document.getElementById(toSlotId);
+
+      if (fromSlot && toSlot) {
+        toSlot.textContent = name;
+        fromSlot.textContent = '';  // 원래 슬롯은 비워둠
+      }
+    });
+  
+    fetch('/get-names')
+      .then(response => response.json())
+      .then(data => {
+        names = data.names;
+        nameDisplay.textContent = names[currentIndex];
+  
+        names.forEach((name, index) => {
+          const nameSlot = document.getElementById(`name-slot-${index + 1}`);
+          nameSlot.textContent = name || '';
+        });
+      });
+  
+    nextButton.addEventListener('click', () => {
+      socket.emit('nextName');
+    });
+  
+    backButton.addEventListener('click', () => {
+      socket.emit('prevName');
+    });
+  
+    socket.on('updateName', function ({ currentName, currentIndex }) {
+      nameDisplay.textContent = currentName;
+    });
+
+    socket.on('updatePoints', function({ slotIndex, newPoints }) {
+      const pointsElement = document.getElementById(`points-team-${slotIndex + 1}`);
+      pointsElement.textContent = `포인트: ${newPoints}`;
+    });
+  
+    const nameInput = document.getElementById('name');
+    const slots = document.querySelectorAll('.team-slot');
+    const bidInput = document.getElementById('bid');
+    const submitBidButton = document.getElementById('submitBid');
+    const highestBidderDisplay = document.getElementById('highestBidder');
+    const highestBidDisplay = document.getElementById('highestBid');
+    const timeLeftDisplay = document.getElementById('timeLeft');
+  
+    slots.forEach(slot => {
+      slot.addEventListener('click', function () {
+        const name = nameInput.value.trim();
+        const slotNumber = parseInt(slot.getAttribute('data-slot'));
+  
+        if (name && !nameLocked) {
+          socket.emit('selectSlot', { name, slot: slotNumber });
+        } else if (!name) {
+          alert('이름을 입력해 주세요!');
+        }
+      });
+    });
+  
+    socket.on('updateTeams', function (teams) {
+      for (let i = 0; i < teams.length; i++) {
+        const slot = document.getElementById(`slot-${i + 1}`);
+        if (teams[i] !== null) {
+          slot.textContent = `${teams[i]}`;
+          slot.classList.add('taken');
+          slot.style.cursor = 'not-allowed';
+        }
+      }
+    });
+  
+    socket.on('alreadyJoined', function () {
+      alert('이미 참가하셨습니다! 다른 자리에 참가할 수 없습니다.');
+    });
+  
+    socket.on('slotTaken', function () {
+      alert('이미 다른 사람이 선택한 자리입니다!');
+    });
+  
+    socket.on('nameLocked', function () {
+      nameLocked = true;
+      nameInput.disabled = true;
+      slotSelected = true;
+    });
+  
+    submitBidButton.addEventListener('click', function () {
+      const name = nameInput.value.trim();
+      const bid = parseInt(bidInput.value);
+  
+      if (!slotSelected) {
+        alert('먼저 자리를 선택해 주세요!');
+        return;
+      }
+  
+      if (bid && name) {
+        socket.emit('bid', { name, bid, slotSelected });
+      } else {
+        alert('올바른 입찰 포인트를 입력해 주세요!');
+      }
+    });
+  
+    socket.on('newBid', function ({ name, bid, timeLeft }) {
+      highestBidderDisplay.textContent = name;
+      highestBidDisplay.textContent = bid;
+      auctionEndTime = Date.now() + timeLeft * 1000;
+  
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 50);
+    });
+  
+    function updateTimer() {
+      const currentTime = Date.now();
+      const timeLeft = auctionEndTime - currentTime;
+  
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        timeLeftDisplay.textContent = '0.000';
+      } else {
+        timeLeftDisplay.textContent = (timeLeft / 1000).toFixed(3);
+      }
+    }
+  
+    socket.on('auctionWon', function ({ name, bid }) {
+      alert(`${name}님이 ${bid}포인트에 낙찰되었습니다!`);
+      clearInterval(timerInterval);
+      timeLeftDisplay.textContent = '0.000';
+    });
+  
+    socket.on('slotNotSelected', function () {
+      alert('먼저 자리를 선택해 주세요!');
+    });
+  
+    startAuctionButton.addEventListener('click', () => {
+      socket.emit('startAuction');
+    });
+  
+    socket.on('auctionStarted', function () {
+      startAuction();
+    });
+  
+    function startAuction() {
+      auctionInProgress = true;
+      highestBid = 0;
+      highestBidder = null;
+      highestBidderDisplay.textContent = '없음';
+      highestBidDisplay.textContent = '0';
+      timeLeftDisplay.textContent = '15.000';
+      auctionEndTime = Date.now() + 15000;
+  
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 50);
+    }
+  
+    // 서버로부터 새 이름 목록을 수신할 때 처리
+    socket.on('nameListUpdated', function(updatedNames) {
+      names = updatedNames;
+      updateNameGrid();  // 화면에 이름 목록을 업데이트
+      nameDisplay.textContent = names[currentIndex];  // 현재 표시되는 이름도 업데이트
+    });
+  
+    // 이름 그리드를 업데이트하는 함수
+    function updateNameGrid() {
+      names.forEach((name, index) => {
+        const nameSlot = document.getElementById(`name-slot-${index + 1}`);
+        nameSlot.textContent = name || '';  // 이름이 있으면 표시, 없으면 빈 값
+      });
+    }    
+  </script>
+</body>
+</html>

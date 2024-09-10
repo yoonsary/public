@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이름 입력</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+      position: relative;
+    }
+    .container {
+      text-align: center;
+    }
+    input {
+      margin: 10px;
+      padding: 10px;
+      font-size: 1em;
+      width: 300px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .top-right {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    .btn {
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>16명의 이름을 입력하세요</h1>
+    <form id="nameForm">
+      <div id="nameInputs">
+        <!-- 이름 입력 필드가 동적으로 추가됩니다 -->
+      </div>
+      <button type="submit">저장</button>
+    </form>
+  </div>
+
+  <!-- 오른쪽 상단에 index.html로 이동하는 버튼 추가 -->
+  <div class="top-right">
+    <a href="index.html" class="btn">메인 페이지로</a>
+  </div>
+
+  <script>
+    const nameForm = document.getElementById('nameForm');
+    const nameInputs = document.getElementById('nameInputs');
+
+    // 16개의 이름 입력 필드를 생성
+    for (let i = 1; i <= 16; i++) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = `name${i}`;
+      input.placeholder = `${i}번 이름 입력`;
+      nameInputs.appendChild(input);
+    }
+
+    // 이름 저장 로직
+    nameForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const names = [];
+      const inputs = nameInputs.querySelectorAll('input');
+      inputs.forEach(input => {
+        const name = input.value.trim();
+        if (name) {
+          names.push(name);
+        }
+      });
+
+      if (names.length === 16) {
+        fetch('/save-names', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ names })
+        }).then(response => response.json())
+          .then(data => {
+            alert(data.message);
+            // 실시간으로 다른 클라이언트에게 전송
+            socket.emit('nameListUpdated', names);
+            // index.html로 이동
+            window.location.href = 'index.html';
+          });
+      } else {
+        alert('모든 이름을 입력해 주세요!');
+      }
+    });
+  </script>
+</body>
+</html>
