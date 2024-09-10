@@ -68,7 +68,6 @@ app.post('/move-to-failed', express.json(), (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('사용자 연결됨');
 
   socket.on('selectSlot', ({ name, slot }) => {
     if (occupiedUsers.has(name)) {
@@ -197,13 +196,4 @@ io.on('connection', (socket) => {
         res.json({ message: '슬롯 상태가 저장되었습니다.' });
     });
   }
-
-
-  socket.on('disconnect', () => {
-    console.log('사용자 연결 해제');
-  });
-});
-
-server.listen(3000, () => {
-  console.log('서버가 3000 포트에서 실행 중입니다.');
 });
